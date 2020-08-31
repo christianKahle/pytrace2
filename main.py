@@ -80,7 +80,7 @@ def processEvents(events,playerInfo):
         if event.type == pygame.QUIT:
             close_action = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DELETE:
+            if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
                 close_action = True
         if event.type == pygame.MOUSEMOTION:
             rotation(playerInfo,event)

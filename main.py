@@ -1,6 +1,6 @@
 import pygame, math, time
 from entities import *
-size = (192,108)
+size = (192,1080)
 screen = pygame.display.set_mode(size,pygame.SCALED)
 pygame.mouse.set_visible(False)
 playerSettings = {
@@ -12,9 +12,10 @@ playerSettings = {
 "sensitivity" : 0.75,
 "scroll_sense": math.radians(10),
 "position"    : pygame.math.Vector3(0,0,0),
-"speed"       : .2
+"speed"       : .2,
+"render_dist" : 35
 }
-fps = 30
+
 pygame.font.init()
 global_light_dir = -pygame.Vector3(1,1,1).normalize()
 font = pygame.font.SysFont("couriernew", 14)
@@ -30,7 +31,7 @@ ents = [
 #rectangle((1,0,0),(1,0,0),(3,1),color=(200,20,20)),
 #rectangle((0.85,-0.15,0.1),(1,1,1),(1,0.5),up=(1,0,1),color=(20,20,200)),
 #sphere((1.15,0,0),(1,0,0),0.35,color=(255,255,55))
-rectangle_prism((6,0,0),(1,0,0),(1,2,3),(0,0,1),(30,230,130))
+rectangle_prism((3,0,0),(1,1,1.3),(1,2,1.5),(0,0,1),(30,230,130))
 ]
 
 def rotation(playerInfo,event):

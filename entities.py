@@ -1,4 +1,5 @@
 from pygame.math import Vector3
+import math
 class entity():
     def __init__(self,position,direction):
         self.pos = Vector3(position)
@@ -23,7 +24,7 @@ class plane(v_entity):
         self.radius = 0
     def raysect(self, ray):
         v = self.pos - ray.pos
-        try:t = self.rot.dot(v) / self.rot.dot(ray.rot)
+        try:t = self.rot *v / self.rot * ray.rot
         except:return False
         if t > 0:
             return t
@@ -52,13 +53,11 @@ class sphere(v_entity):
     def raysect(self, ray):
         v = ray.pos - self.pos
         u = -v.dot(ray.rot)
-        t = False
-        for i in range(-1,2,2):
-            t_temp = u+i*(((u**2)+((self.radius**2)-v.length_squared()))**.5)
-            if type(t_temp) == float and t_temp > 0:
-                t = t_temp
-                break
-        return t
+        for i in [-1,1]:
+            t = u+i*(((u**2)+((self.radius**2)-v.length_squared()))**.5)
+            if type(t) == float and t > 0:
+                return t
+        return False
     def ray_normal(self,ray,d):
         y = ray.pos + ray.rot*d
         return (y - self.pos).normalize()
@@ -68,18 +67,29 @@ class rectangle_prism(v_entity):
         self.size = Vector3(size)/2
         self.up = Vector3(up)
         self.radius = self.size.length()
-        self.r2 = self.radius**2
-        xd = self.rot * self.size.x
-        yd = self.rot.cross(self.up).normalize() * self.size.y
-        zd = xd.cross(yd).normalize() * self.size.z
-        self.m = xd + yd + zd
+        self.m = [self.rot,self.rot.cross(self.up).normalize()]
+        self.m.append(self.rot.cross(self.m[1]))
     def raysect(self, ray):
         v = self.pos - ray.pos
-        t = False
-        try:t = (self.r2 - self.m * v) / (self.m * self.d)
-        except:pass
-        if (t<=0):return False
-        return t
+        lt = []
+        for n in [0,1,2]:
+            for i in [-1,1]:
+                try:t = (v*self.m[n] + i*self.size[n])/(ray.rot * self.m[n])
+                except:t = 0
+                x = (t * ray.rot + ray.pos) - self.pos 
+                if (abs(x * self.m[(n+1)%3]) <= self.size[(n+1)%3] and abs(x * self.m[(n+2)%3]) <= self.size[(n+2)%3]):lt.append(t)
+        small = False
+        for t in lt:
+            if not small:
+                small = t
+            elif t < small:
+                small = t
+        return small
     def ray_normal(self,ray,d):
-        y = ray.pos + ray.rot*d
-        return (y - self.pos).normalize()
+        n = ray.pos + ray.rot*d - self.pos
+        x = n*self.m[0]/self.size[0]
+        y = n*self.m[1]/self.size[1]
+        z = n*self.m[2]/self.size[2]
+        if abs(x) > abs(y) and abs(x) > abs(z):return self.m[0] * math.copysign(1,x)
+        if abs(y) > abs(z):return self.m[1] * math.copysign(1,y)
+        return self.m[2] * math.copysign(1,z)

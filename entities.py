@@ -24,7 +24,7 @@ class plane(v_entity):
         self.radius = 0
     def raysect(self, ray):
         v = self.pos - ray.pos
-        try:t = self.rot *v / self.rot * ray.rot
+        try:t = self.rot *v / (self.rot * ray.rot)
         except:return False
         if t > 0:
             return t

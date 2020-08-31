@@ -23,10 +23,8 @@ class plane(v_entity):
         self.radius = 0
     def raysect(self, ray):
         v = self.pos - ray.pos
-        try:
-            t = self.rot.dot(v) / self.rot.dot(ray.rot)
-        except:
-            return False
+        try:t = self.rot.dot(v) / self.rot.dot(ray.rot)
+        except:return False
         if t > 0:
             return t
         return False
@@ -78,8 +76,9 @@ class rectangle_prism(v_entity):
     def raysect(self, ray):
         v = self.pos - ray.pos
         t = False
-        try:t = (self.r2-self.m * v) / (self.m * self.d)
+        try:t = (self.r2 - self.m * v) / (self.m * self.d)
         except:pass
+        if (t<=0):return False
         return t
     def ray_normal(self,ray,d):
         y = ray.pos + ray.rot*d

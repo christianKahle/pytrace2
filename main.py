@@ -1,6 +1,6 @@
 import pygame, math, time
 from entities import *
-size = (224,126)
+size = (192,108)
 screen = pygame.display.set_mode(size,pygame.SCALED)
 pygame.mouse.set_visible(False)
 playerSettings = {
@@ -100,8 +100,7 @@ def ray(entities,direction,playerInfo,x,y):
                 short_len = p
                 shortest = e
     if shortest:
-        if x == size[0]//2 and y == size[1]//2:
-            text = font.render(str([round(i,2) for i in (r.pos + r.rot * short_len)]),False,(255,255,255),(0,0,0,100));screen.blit(text,text.get_rect())
+        #if x == size[0]//2 and y == size[1]//2:text = font.render(str([round(i,2) for i in (r.pos + r.rot * short_len)]),False,(255,255,255),(0,0,0,100));screen.blit(text,text.get_rect())
         pygame.draw.rect(screen,shortest.global_light_color(r,short_len,global_light_dir),(x,y,1,1))
     return short_len
 

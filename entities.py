@@ -12,16 +12,15 @@ class v_entity(entity):
     def __init__(self,position,direction,color=(0,0,0)):
         super().__init__(position,direction)
         self.color = Vector3(color)
+        self.radius = 0
     def raysect(self,ray):
         return False
-    def radius(self):
-        return 0
     def global_light_color(self,ray,distance,source):
         return [int(i/2+.5) for i in (Vector3(self.color)*max((-self.ray_normal(ray,distance)*source+1),0.25))]
 class plane(v_entity):
-    def __init__(self,position,direction,color):
+    def __init__(self,position,direction,color=(0,0,0)):
         super().__init__(position,direction,color)
-        self.radius = 0
+        self.radius = 100
     def raysect(self, ray):
         v = self.pos - ray.pos
         try:t = self.rot *v / (self.rot * ray.rot)
@@ -77,7 +76,7 @@ class rectangle_prism(v_entity):
                 try:t = (v*self.m[n] + i*self.size[n])/(ray.rot * self.m[n])
                 except:t = 0
                 x = (t * ray.rot + ray.pos) - self.pos 
-                if (abs(x * self.m[(n+1)%3]) <= self.size[(n+1)%3] and abs(x * self.m[(n+2)%3]) <= self.size[(n+2)%3]):lt.append(t)
+                if (abs(x * self.m[(n+1)%3]) < self.size[(n+1)%3] and abs(x * self.m[(n+2)%3]) < self.size[(n+2)%3]):lt.append(t)
         small = False
         for t in lt:
             if not small:

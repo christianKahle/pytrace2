@@ -1,6 +1,6 @@
 import pygame, math, time
 from entities import *
-size = (192,1080)
+size = (240,135)
 screen = pygame.display.set_mode(size,pygame.SCALED)
 pygame.mouse.set_visible(False)
 playerSettings = {
@@ -13,7 +13,8 @@ playerSettings = {
 "scroll_sense": math.radians(10),
 "position"    : pygame.math.Vector3(0,0,0),
 "speed"       : .2,
-"render_dist" : 35
+"render_dist" : 35,
+"frustum_calc": (16,9)
 }
 
 pygame.font.init()
@@ -105,22 +106,41 @@ def ray(entities,direction,playerInfo,x,y):
         pygame.draw.rect(screen,shortest.global_light_color(r,short_len,global_light_dir),(x,y,1,1))
     return short_len
 
+def max_distance(entities,playerInfo):
+    return [entity for entity in entities if (entity.pos-playerInfo["position"]).length()-entity.radius < playerInfo["render_dist"]]
+
+def frustum(entities,topleft,botright,up,pos):
+    left = -topleft.cross(up).normalize()
+    right = botright.cross(up).normalize()
+    for n in left,right:
+        entities = [e for e in entities if (e.pos - pos) * n + e.radius > 0]
+    return entities
+    
+
+
 def update(playerInfo,entity_list):
+    screen.fill((0,0,0))
+    entity_list = max_distance(entity_list,playerInfo)
     looking = playerInfo["looking"]
     up = playerInfo["up"]
     fov = playerInfo["fov"]
+    refrustum = playerInfo["frustum_calc"]
     x_delta = up.cross(looking).normalize()/size[0]*math.tan(fov/2)
     y_delta = x_delta.cross(looking)
-    for y in range(size[1]):
-        y_n = y_delta*(2*y-size[1])
-        for x in range(size[0]):
-            x_n = x_delta*(2*x-size[0])
-            look = (looking + x_n + y_n).normalize()
-            if not ray(entity_list,look,playerInfo,x,y):
-                color = [max(min(int((val*256)+.5)+127,255),0) for val in look]
-                pygame.draw.rect(screen,color,(x,y,1,1))
-            if x == size[0]//2 and y == size[1]//2:
-                pygame.draw.rect(screen,(120,120,120),(x,y,1,1))
+    ents = []
+    for y_mul in range(size[1]//refrustum[1]):
+        y2 = y_mul*refrustum[1]
+        for x_mul in range(size[0]//refrustum[0]):
+            x2 = x_mul*refrustum[0]
+            ents = frustum(entity_list,(looking + x_delta*(2*x2-size[0]) + y_delta*(2*y2-size[1])).normalize(),(looking + x_delta*(2*(x2+refrustum[0]-1)-size[0]) + y_delta*(2*(y2+refrustum[1]-1)-size[1])).normalize(),up,playerInfo["position"])
+            for y in range(refrustum[1]):
+                y_n = y_delta*(2*(y+y2)-size[1])
+                for x in range(refrustum[0]):
+                    x_n = x_delta*(2*(x+x2)-size[0])
+                    look = (looking + x_n + y_n).normalize()
+                    ray(ents,look,playerInfo,x+x2,y+y2)
+
+    pygame.draw.rect(screen,(120,120,120),(size[0]//2,size[1]//2,1,1))
         
     
 

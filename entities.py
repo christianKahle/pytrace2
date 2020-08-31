@@ -12,10 +12,9 @@ class v_entity(entity):
     def __init__(self,position,direction,color=(0,0,0)):
         super().__init__(position,direction)
         self.color = Vector3(color)
+        self.radius = 0
     def raysect(self,ray):
         return False
-    def radius(self):
-        return 0
     def global_light_color(self,ray,distance,source):
         return [int(i/2+.5) for i in (Vector3(self.color)*max((-self.ray_normal(ray,distance)*source+1),0.25))]
 class plane(v_entity):

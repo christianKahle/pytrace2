@@ -3,19 +3,20 @@ from entities import *
 size = (240,135)
 screen = pygame.display.set_mode(size,pygame.SCALED)
 pygame.mouse.set_visible(False)
+
 playerSettings = {
-"up"          : pygame.math.Vector3(0,0,1),
-"fwd"         : pygame.math.Vector3(1,0,0),
-"look_angles" : (0,0),
-"looking"     : pygame.math.Vector3(1,0,0),
-"fov"         : math.radians(90),
-"sensitivity" : 0.75,
-"scroll_sense": math.radians(10),
-"position"    : pygame.math.Vector3(0,0,0),
-"speed"       : .2,
-"render_dist" : 35,
-"frustum_calc": (16,9)
-}
+    "up"          : pygame.math.Vector3(0,0,1),
+    "fwd"         : pygame.math.Vector3(1,0,0),
+    "look_angles" : (0,0),
+    "looking"     : pygame.math.Vector3(1,0,0),
+    "fov"         : math.radians(90),
+    "sensitivity" : 0.75,
+    "scroll_sense": math.radians(10),
+    "position"    : pygame.math.Vector3(0,0,0),
+    "speed"       : .2,
+    "render_dist" : 35,
+    "frustum_calc": (16,9)
+    }
 
 pygame.font.init()
 global_light_dir = -pygame.Vector3(1,1,1).normalize()
@@ -27,14 +28,12 @@ pygame.event.get()
 #inf_plane IS A PLANE WITHOUT LIMITS, IN THIS CASE, THE GROUND
 
 ents = [ 
-#plane((0,0,-1),(0,0,1),color=(0,0,0)),
-#plane((0,-1,0),(0,1,0),color=(200,0,0)),
+#plane((0,0,-2),(0,0,1),color=(0,0,0)),
 #rectangle((1,0,0),(1,0,0),(3,1),color=(200,20,20)),
 #rectangle((0.85,-0.15,0.1),(1,1,1),(1,0.5),up=(1,0,1),color=(20,20,200)),
-#sphere((1.15,0,0),(1,0,0),0.35,color=(255,255,55))
-rectangle_prism((3,0,0),(1,1,1.3),(1,2,1.5),(0,0,1),(30,230,130))
+sphere((2,0,0.5),(1,0,0),0.35,color=(230,230,30))
+#rectangle_prism((2,0,0),(1,1,0),(1,1,1),(0,0,1),(30,230,130))
 ]
-
 def rotation(playerInfo,event):
     look_angles = playerInfo["look_angles"]
     up = playerInfo["up"]
@@ -51,7 +50,6 @@ def rotation(playerInfo,event):
         playerInfo["looking"] = looking
     if pygame.display.get_active():
         pygame.mouse.set_pos(size[0]//2,size[1]//2)
-    
 
 def zoom(playerInfo,event):
     b = event.button == 5
@@ -66,8 +64,8 @@ movement = {
     pygame.K_d:lambda pos,fwd,up,speed: pos - fwd.cross(up) * speed,
     pygame.K_a:lambda pos,fwd,up,speed: pos + fwd.cross(up) * speed,
     pygame.K_SPACE:lambda pos,fwd,up,speed: pos + up * speed,
-    pygame.K_LSHIFT:lambda pos,fwd,up,speed: pos - up * speed,
-}
+    pygame.K_LSHIFT:lambda pos,fwd,up,speed: pos - up * speed
+    }
 def move(playerInfo):
     pos, fwd, up, speed = playerInfo["position"], playerInfo["looking"], playerInfo["up"], playerInfo["speed"]
     pressed = pygame.key.get_pressed()
@@ -115,11 +113,9 @@ def frustum(entities,topleft,botright,up,pos):
     for n in left,right:
         entities = [e for e in entities if (e.pos - pos) * n + e.radius > 0]
     return entities
-    
-
 
 def update(playerInfo,entity_list):
-    screen.fill((0,0,0))
+    screen.fill((30,130,230))
     entity_list = max_distance(entity_list,playerInfo)
     looking = playerInfo["looking"]
     up = playerInfo["up"]
@@ -127,7 +123,6 @@ def update(playerInfo,entity_list):
     refrustum = playerInfo["frustum_calc"]
     x_delta = up.cross(looking).normalize()/size[0]*math.tan(fov/2)
     y_delta = x_delta.cross(looking)
-    ents = []
     for y_mul in range(size[1]//refrustum[1]):
         y2 = y_mul*refrustum[1]
         for x_mul in range(size[0]//refrustum[0]):
@@ -140,9 +135,8 @@ def update(playerInfo,entity_list):
                     look = (looking + x_n + y_n).normalize()
                     ray(ents,look,playerInfo,x+x2,y+y2)
 
-    pygame.draw.rect(screen,(120,120,120),(size[0]//2,size[1]//2,1,1))
+    #pygame.draw.rect(screen,(120,120,120),(size[0]//2,size[1]//2,1,1))
         
-    
 
 current_info = None
 while(processEvents(pygame.event.get(),playerSettings)):
